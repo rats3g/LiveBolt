@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
@@ -44,6 +45,8 @@ namespace LiveBolt
             services.AddScoped<IRepository, Repository>();
 
             services.AddMvc();
+
+            services.AddAutoMapper(typeof(Startup));
 
             /*services.AddIdentityServer()
                 .AddDeveloperSigningCredential() // TODO: This should check if in production and utilize cert from machine certificate store

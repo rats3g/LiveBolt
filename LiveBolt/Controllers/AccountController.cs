@@ -42,7 +42,7 @@ namespace LiveBolt.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    ModelState.AddModelError("ErrorMessage", "Invalid login attempt.");
                     return BadRequest(ModelState);
                 }
             }
@@ -66,7 +66,9 @@ namespace LiveBolt.Controllers
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return Ok();
                 }
-                AddErrors(result);
+
+                ModelState.AddModelError("ErrorMessage", "Unable to register new account.");
+                return BadRequest(ModelState);
             }
 
             // If we got this far, something failed
@@ -80,18 +82,5 @@ namespace LiveBolt.Controllers
             _logger.LogInformation("User logged out.");
             return Ok();
         }
-
-
-        #region Helpers
-
-        private void AddErrors(IdentityResult result)
-        {
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-        }
-
-        #endregion
     }
 }
