@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -41,7 +42,7 @@ namespace LiveBolt.Controllers
                     return BadRequest();
                 }
 
-                var passwordHasher = new Rfc2898DeriveBytes(model.Password, 256);
+                var passwordHasher = new Rfc2898DeriveBytes(model.Password, 256); // Should be using larger iteration count
 
                 var home = new Home()
                 {
@@ -62,7 +63,7 @@ namespace LiveBolt.Controllers
 
                 var mappedHome = _mapper.Map<Home, HomeStatusViewModel>(newHome);
 
-                return Ok(mappedHome); // TODO: Map this to a view model in order to not expose ID and all User information
+                return Ok(mappedHome);
             }
 
             return BadRequest(ModelState);
@@ -82,7 +83,38 @@ namespace LiveBolt.Controllers
 
             var mappedHome = _mapper.Map<Home, HomeStatusViewModel>(home);
 
-            return Ok(mappedHome); // TODO: Map this to a view model in order to not expose ID, PASSWORD, and all User information
+            return Ok(mappedHome);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Join(JoinViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var currentUser = await _userManager.GetUserAsync(HttpContext.User);
+
+                if (currentUser.HomeId != null)
+                {
+                    return BadRequest();
+                }
+
+                var joinHome = _repository.GetHomeByNameAndPassword(model.Name, model.Password);
+
+                if (joinHome == null)
+                {
+                    ModelState.AddModelError("ErrorMessage", "Invalid home login.");
+                    return BadRequest(ModelState);
+                }
+
+                joinHome.Users.Add(currentUser);
+                currentUser.HomeId = joinHome.Id;
+
+                await _repository.Commit();
+
+                return Ok();
+            }
+
+            return BadRequest(ModelState);
         }
 
         public async Task<IActionResult> Remove()
@@ -96,9 +128,16 @@ namespace LiveBolt.Controllers
 
             var home = await _repository.GetHomeById(currentUser.HomeId);
 
-            _repository.RemoveHome(home);
+            home.Users.Remove(currentUser);
+            currentUser.HomeId = null;
 
             await _repository.Commit();
+
+            if (home.Users.Count == 0)
+            {
+                _repository.RemoveHome(home);
+                await _repository.Commit();
+            }
 
             return Ok();
         }
