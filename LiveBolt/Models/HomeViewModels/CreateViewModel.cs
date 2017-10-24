@@ -10,6 +10,11 @@ namespace LiveBolt.Models.HomeViewModels
         public string Name { get; set; }
 
         [Required]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 4)]
+        [Display(Name = "Nickname")]
+        public string Nickname { get; set; }
+
+        [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]

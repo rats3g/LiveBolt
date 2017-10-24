@@ -8,6 +8,8 @@ namespace LiveBolt.Models
 
         public string Name { get; set; }
 
+        public string Nickname { get; set; }
+
         public byte[] PasswordHash { get; set; }
 
         public byte[] Salt { get; set; }

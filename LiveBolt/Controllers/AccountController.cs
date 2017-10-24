@@ -67,7 +67,7 @@ namespace LiveBolt.Controllers
                     return Ok();
                 }
 
-                ModelState.AddModelError("ErrorMessage", "Unable to register new account.");
+                ModelState.AddModelError("ErrorMessage", "Account already registered.");
                 return BadRequest(ModelState);
             }
 

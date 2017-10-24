@@ -44,9 +44,16 @@ namespace LiveBolt.Controllers
 
                 var passwordHasher = new Rfc2898DeriveBytes(model.Password, 256); // Should be using larger iteration count
 
-                var home = new Home()
+                if (_repository.ContainsHome(model.Name))
+                {
+                    ModelState.AddModelError("ErrorMessage", "Home with that name already exists");
+                    return BadRequest(ModelState);
+                }
+
+                var home = new Home
                 {
                     Name = model.Name,
+                    Nickname = model.Nickname,
                     Salt = passwordHasher.Salt,
                     PasswordHash = passwordHasher.GetBytes(256),
                     Users = new List<ApplicationUser>

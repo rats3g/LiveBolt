@@ -38,6 +38,11 @@ namespace LiveBolt.Data
             return null;
         }
 
+        public bool ContainsHome(string name)
+        {
+            return _context.Homes.Any(home => home.Name == name);
+        }
+
         public async Task<Home> AddHome(Home home)
         {
             await _context.Homes.AddAsync(home);
