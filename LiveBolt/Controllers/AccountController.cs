@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using LiveBolt.Models;
 using LiveBolt.Models.AccountViewModels;
+using LiveBolt.Data;
 
 namespace LiveBolt.Controllers
 {
@@ -14,15 +15,18 @@ namespace LiveBolt.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IRepository _repository;
         private readonly ILogger _logger;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
+            IRepository repository,
             ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _repository = repository;
             _logger = logger;
         }
 
@@ -81,6 +85,28 @@ namespace LiveBolt.Controllers
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
             return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateLocationAsync(UpdateLocationViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var currentUser = await _userManager.GetUserAsync(HttpContext.User);
+
+                if (currentUser.HomeId != null)
+                {
+                    return BadRequest();
+                }
+
+                currentUser.IsHome = model.IsHome;
+
+                await _repository.Commit();
+
+                return Ok();
+            }
+
+            return BadRequest(ModelState);
         }
     }
 }
