@@ -56,6 +56,8 @@ namespace LiveBolt.Controllers
                     Nickname = model.Nickname,
                     Salt = passwordHasher.Salt,
                     PasswordHash = passwordHasher.GetBytes(256),
+                    Longitude = model.Longitude,
+                    Latitude = model.Latitude,
                     Users = new List<ApplicationUser>
                     {
                         currentUser

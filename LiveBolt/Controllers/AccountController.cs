@@ -88,13 +88,13 @@ namespace LiveBolt.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateLocationAsync(UpdateLocationViewModel model)
+        public async Task<IActionResult> UpdateLocation(UpdateLocationViewModel model)
         {
             if (ModelState.IsValid)
             {
                 var currentUser = await _userManager.GetUserAsync(HttpContext.User);
 
-                if (currentUser.HomeId != null)
+                if (currentUser.HomeId == null)
                 {
                     return BadRequest();
                 }
