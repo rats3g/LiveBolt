@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using LiveBolt.Models;
 
 namespace LiveBolt.Data
@@ -10,6 +11,10 @@ namespace LiveBolt.Data
         bool ContainsHome(string name);
         Task<Home> AddHome(Home home);
         void RemoveHome(Home home);
+        Task<DLM> GetDLMByGuid(Guid guid);
+        Task<IDM> GetIDMByGuid(Guid guid);
+        void AddDLM(DLM dlm);
+        void AddIDM(IDM idm);
         Task Commit();
     }
 }

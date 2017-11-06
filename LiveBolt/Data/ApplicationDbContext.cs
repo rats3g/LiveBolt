@@ -12,6 +12,8 @@ namespace LiveBolt.Data
         }
 
         public DbSet<Home> Homes { get; set; }
+        public DbSet<DLM> DLMs { get; set; }
+        public DbSet<IDM> IDMs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

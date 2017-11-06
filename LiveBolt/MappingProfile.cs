@@ -11,6 +11,8 @@ namespace LiveBolt
             // Register mappings between persistence models and view models
             CreateMap<ApplicationUser, HomeUserViewModel>().ReverseMap();
             CreateMap<Home, HomeStatusViewModel>().ReverseMap();
+            CreateMap<DLM, HomeDLMViewModel>().ReverseMap();
+            CreateMap<IDM, HomeIDMViewModel>().ReverseMap();
         }
 
         /*[Fact]

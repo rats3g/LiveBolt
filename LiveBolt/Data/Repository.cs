@@ -18,7 +18,7 @@ namespace LiveBolt.Data
 
         public async Task<Home> GetHomeById(int? id)
         {
-            return id == null ? null : await _context.Homes.Where(home => home.Id == id).Include(home => home.Users).FirstOrDefaultAsync();
+            return id == null ? null : await _context.Homes.Where(home => home.Id == id).Include(home => home.Users).Include(home => home.DLMs).Include(home => home.IDMs).FirstOrDefaultAsync();
         }
 
         public Home GetHomeByNameAndPassword(string name, string password)
@@ -55,6 +55,30 @@ namespace LiveBolt.Data
         public void RemoveHome(Home home)
         {
             _context.Homes.Remove(home);
+        }
+
+        public async Task<DLM> GetDLMByGuid(Guid guid)
+        {
+            return await _context.DLMs.Where(dlm => dlm.Id.Equals(guid)).FirstOrDefaultAsync();
+        }
+
+        public async Task<IDM> GetIDMByGuid(Guid guid)
+        {
+            return await _context.IDMs.Where(idm => idm.Id.Equals(guid)).FirstOrDefaultAsync();
+        }
+
+        public async void AddDLM(DLM dlm)
+        {
+            await _context.DLMs.AddAsync(dlm);
+
+            await Commit();
+        }
+
+        public async void AddIDM(IDM idm)
+        {
+            await _context.IDMs.AddAsync(idm);
+
+            await Commit();
         }
 
         public async Task Commit()

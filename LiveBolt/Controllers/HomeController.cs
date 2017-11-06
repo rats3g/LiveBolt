@@ -120,7 +120,9 @@ namespace LiveBolt.Controllers
 
                 await _repository.Commit();
 
-                return Ok();
+                var mappedHome = _mapper.Map<Home, HomeStatusViewModel>(joinHome);
+
+                return Ok(mappedHome);
             }
 
             return BadRequest(ModelState);

@@ -19,5 +19,9 @@ namespace LiveBolt.Models
         public double Longitude { get; set; }
 
         public ICollection<ApplicationUser> Users { get; set; }
+
+        public ICollection<DLM> DLMs { get; set; }
+
+        public ICollection<IDM> IDMs { get; set; }
     }
 }
