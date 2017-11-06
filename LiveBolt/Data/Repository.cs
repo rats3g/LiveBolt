@@ -23,7 +23,7 @@ namespace LiveBolt.Data
 
         public Home GetHomeByNameAndPassword(string name, string password)
         {
-            var matchingNames = _context.Homes.Where(home => home.Name == name).Include(home => home.Users);
+            var matchingNames = _context.Homes.Where(home => home.Name == name).Include(home => home.Users).Include(home => home.DLMs).Include(home => home.IDMs);
 
             foreach (var matchName in matchingNames)
             {

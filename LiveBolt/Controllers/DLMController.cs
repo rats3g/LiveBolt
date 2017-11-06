@@ -21,14 +21,21 @@ namespace LiveBolt.Controllers
             _userManager = userManager;
         }
 
+        [HttpPost]
         [AllowAnonymous]
-        public IActionResult Create(CreateViewModel model)
+        public async Task<IActionResult> Create(CreateViewModel model)
         {
             // TODO: Must check CompanyKey to ensure it was our module that sent the information
             // if (CompanyKey != OurKey) { return BadRequest() unauthorized? }
 
             if (ModelState.IsValid)
             {
+                var storedDLM = await _repository.GetDLMByGuid(model.Id);
+                if (storedDLM != null)
+                {
+                    return BadRequest($"Module with id: {model.Id} already created");
+                }
+
                 var dlm = new DLM
                 {
                     Id = model.Id,
@@ -36,11 +43,14 @@ namespace LiveBolt.Controllers
                 };
 
                 _repository.AddDLM(dlm);
+
+                return Ok();
             }
 
             return BadRequest(ModelState);
         }
 
+        [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             var currentUser = await _userManager.GetUserAsync(HttpContext.User);
@@ -58,9 +68,11 @@ namespace LiveBolt.Controllers
             var home = await _repository.GetHomeById(currentUser.HomeId);
 
             dlm.Nickname = model.Nickname;
-            dlm.AssociatedHome = home;
+            dlm.AssociatedHomeId = home.Id;
 
             home.DLMs.Add(dlm);
+
+            await _repository.Commit();
 
             return Ok();
         }

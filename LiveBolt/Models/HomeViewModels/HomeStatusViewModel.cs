@@ -9,7 +9,7 @@ namespace LiveBolt.Models.HomeViewModels
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public ICollection<HomeUserViewModel> Users { get; set; }
-        public ICollection<DLM> DLMs { get; set; }
-        public ICollection<IDM> IDMs { get; set; }
+        public ICollection<HomeDLMViewModel> DLMs { get; set; }
+        public ICollection<HomeIDMViewModel> IDMs { get; set; }
     }
 }
