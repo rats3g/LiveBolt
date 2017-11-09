@@ -151,5 +151,17 @@ namespace LiveBolt.Controllers
 
             return Ok();
         }
+
+        [HttpPost]
+        public IActionResult SetDLMState(SetDLMStateViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // TODO: interact with module via MQTT to set lock state as desired.
+                return Ok();
+            }
+
+            return BadRequest(ModelState);
+        }
     }
 }
