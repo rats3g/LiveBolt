@@ -5,6 +5,7 @@ using AutoMapper;
 using LiveBolt.Data;
 using LiveBolt.Models;
 using LiveBolt.Models.HomeViewModels;
+using LiveBolt.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,13 +21,15 @@ namespace LiveBolt.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IMqttService _mqtt;
 
-        public HomeController(UserManager<ApplicationUser> userManager, ILogger<HomeController> logger, IRepository repository, IMapper mapper)
+        public HomeController(UserManager<ApplicationUser> userManager, ILogger<HomeController> logger, IRepository repository, IMapper mapper, IMqttService mqtt)
         {
             _userManager = userManager;
             _logger = logger;
             _repository = repository;
             _mapper = mapper;
+            _mqtt = mqtt;
         }
 
         [HttpPost]
@@ -153,12 +156,13 @@ namespace LiveBolt.Controllers
         }
 
         [HttpPost]
-        public IActionResult SetDLMState(SetDLMStateViewModel model)
+        public async Task<IActionResult> SetDLMState(SetDLMStateViewModel model)
         {
             if (ModelState.IsValid)
             {
-                // TODO: interact with module via MQTT to set lock state as desired.
-                return Ok();
+                if (await _mqtt.PublishLockCommand(model.DLMId, model.Locked)) {
+                    return Ok();
+                }
             }
 
             return BadRequest(ModelState);

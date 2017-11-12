@@ -31,7 +31,7 @@ namespace LiveBolt
         public IHostingEnvironment HostingEnvironment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public async void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             if (HostingEnvironment.IsDevelopment())
             {
@@ -64,7 +64,7 @@ namespace LiveBolt
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext dbContext, IMqttService mqttService)
+        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext dbContext, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
@@ -100,7 +100,7 @@ namespace LiveBolt
                 .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
                 .WithClientOptions(new MqttClientOptionsBuilder()
                     .WithClientId("LiveboltServer")
-                    .WithTcpServer("localhost", 1883)
+                    .WithTcpServer("localhost")
                     .WithCredentials("livebolt", "livebolt")
                     .Build())
                 .Build();
@@ -115,10 +115,7 @@ namespace LiveBolt
 
             mqttClient.ApplicationMessageReceived += (s, e) =>
             {
-                Console.WriteLine("### Message Received ###");
-                Console.WriteLine($"Topic: {e.ApplicationMessage.Topic}");
-                Console.WriteLine($"Payload: {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
-                Console.WriteLine();
+                var mqttService = serviceProvider.GetService<IMqttService>();
 
                 var topic = e.ApplicationMessage.Topic;
                 var values = Encoding.UTF8.GetString(e.ApplicationMessage.Payload).Split(",");

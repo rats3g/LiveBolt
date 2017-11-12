@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace LiveBolt.Services
 {
@@ -8,6 +9,6 @@ namespace LiveBolt.Services
         void UpdateDLMStatus(Guid moduleId, bool isLocked);
         void RegisterIDM(Guid moduleId, string homeId, string homePassword, string nickname);
         void UpdateIDMStatus(Guid moduleId, bool isClosed);
-        bool PublishLockCommand(Guid moduleId, bool isLocked);
+        Task<bool> PublishLockCommand(Guid moduleId, bool isLocked);
     }
 }

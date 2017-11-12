@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Threading.Tasks;
 using LiveBolt.Data;
 using LiveBolt.Models;
+using MQTTnet;
+using MQTTnet.Core;
+using MQTTnet.Core.Client;
+using MQTTnet.Core.ManagedClient;
 
 namespace LiveBolt.Services
 {
@@ -97,9 +102,35 @@ namespace LiveBolt.Services
             await _repository.Commit();
         }
 
-        public bool PublishLockCommand(Guid moduleId, bool isLocked)
+        public async Task<bool> PublishLockCommand(Guid moduleId, bool isLocked)
         {
-            return false;
+            var dlm = await _repository.GetDLMByGuid(moduleId);
+            if (dlm == null)
+            {
+                return false;
+            }
+
+            var mqttOptions = new MqttClientOptionsBuilder()
+                .WithClientId("LiveboltServer")
+                .WithTcpServer("localhost")
+                .WithCredentials("livebolt", "livebolt")
+                .Build();
+
+            var mqttClient = new MqttFactory().CreateMqttClient();
+
+            await mqttClient.ConnectAsync(mqttOptions);
+
+            var message = new MqttApplicationMessageBuilder()
+                .WithTopic($"dlm/lock/{moduleId}")
+                .WithPayload(isLocked.ToString())
+                .WithExactlyOnceQoS()
+                .Build();
+
+            await mqttClient.PublishAsync(message);
+
+            await mqttClient.DisconnectAsync();
+
+            return true;
         }
     }
 }
