@@ -14,6 +14,7 @@ using MQTTnet.Core.Client;
 using MQTTnet;
 using MQTTnet.Core;
 using System.Text;
+using LiveBolt.Services;
 
 namespace LiveBolt
 {
@@ -49,38 +50,11 @@ namespace LiveBolt
 
             // Add application services.
             services.AddScoped<IRepository, Repository>();
+            services.AddScoped<IMqttService, MqttService>();
 
             services.AddMvc();
 
             services.AddAutoMapper(typeof(Startup));
-
-            // Setup MQTT subscriptions
-            var mqttOptions = new ManagedMqttClientOptionsBuilder()
-                .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
-                .WithClientOptions(new MqttClientOptionsBuilder()
-                    .WithClientId("LiveboltServer")
-                    .WithTcpServer("localhost", 1883)
-                    .WithCredentials("livebolt", "livebolt")
-                    .Build())
-                .Build();
-
-            var mqttClient = new MqttFactory().CreateManagedMqttClient();
-
-            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("dlm/register").Build());
-            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("dlm/status").Build());
-
-            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("idm/register").Build());
-            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("idm/status").Build());
-
-            mqttClient.ApplicationMessageReceived += (s, e) =>
-            {
-                Console.WriteLine("### Message Received ###");
-                Console.WriteLine($"Topic: {e.ApplicationMessage.Topic}");
-                Console.WriteLine($"Payload: {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
-                Console.WriteLine();
-            };
-
-            await mqttClient.StartAsync(mqttOptions);
 
             /*services.AddIdentityServer()
                 .AddDeveloperSigningCredential() // TODO: This should check if in production and utilize cert from machine certificate store
@@ -90,7 +64,7 @@ namespace LiveBolt
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext dbContext)
+        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext dbContext, IMqttService mqttService)
         {
             if (env.IsDevelopment())
             {
@@ -120,6 +94,69 @@ namespace LiveBolt
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            // Setup MQTT subscriptions
+            var mqttOptions = new ManagedMqttClientOptionsBuilder()
+                .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
+                .WithClientOptions(new MqttClientOptionsBuilder()
+                    .WithClientId("LiveboltServer")
+                    .WithTcpServer("localhost", 1883)
+                    .WithCredentials("livebolt", "livebolt")
+                    .Build())
+                .Build();
+
+            var mqttClient = new MqttFactory().CreateManagedMqttClient();
+
+            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("dlm/register").Build());
+            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("dlm/status").Build());
+
+            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("idm/register").Build());
+            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("idm/status").Build());
+
+            mqttClient.ApplicationMessageReceived += (s, e) =>
+            {
+                Console.WriteLine("### Message Received ###");
+                Console.WriteLine($"Topic: {e.ApplicationMessage.Topic}");
+                Console.WriteLine($"Payload: {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
+                Console.WriteLine();
+
+                var topic = e.ApplicationMessage.Topic;
+                var values = Encoding.UTF8.GetString(e.ApplicationMessage.Payload).Split(",");
+
+                if (!Guid.TryParse(values[0], out var guid))
+                {
+                    return;
+                }
+
+                if (topic == "dlm/register" && values.Length == 4)
+                {
+                    mqttService.RegisterDLM(guid, values[1], values[2], values[3]);
+                }
+                else if (topic == "dlm/status" && values.Length == 2)
+                {
+                    if (!bool.TryParse(values[1], out var isLocked))
+                    {
+                        return;
+                    }
+
+                    mqttService.UpdateDLMStatus(guid, isLocked);
+                }
+                else if (topic == "idm/register" && values.Length == 4)
+                {
+                    mqttService.RegisterIDM(guid, values[1], values[2], values[3]);
+                }
+                else if (topic == "idm/status" && values.Length == 2)
+                {
+                    if (!bool.TryParse(values[1], out var isLocked))
+                    {
+                        return;
+                    }
+
+                    mqttService.UpdateIDMStatus(guid, isLocked);
+                }
+            };
+
+            await mqttClient.StartAsync(mqttOptions);
         }
     }
 }
