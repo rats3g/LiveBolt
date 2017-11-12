@@ -4,7 +4,7 @@ using LiveBolt.Models;
 
 namespace LiveBolt.Services
 {
-    public class MqttService
+    public class MqttService : IMqttService
     {
         private readonly IRepository _repository;
 
@@ -95,6 +95,11 @@ namespace LiveBolt.Services
             idm.IsClosed = isClosed;
 
             await _repository.Commit();
+        }
+
+        public bool PublishLockCommand(Guid moduleId, bool isLocked)
+        {
+            return false;
         }
     }
 }
