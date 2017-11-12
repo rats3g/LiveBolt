@@ -48,6 +48,10 @@ namespace LiveBolt
 
             services.AddAutoMapper(typeof(Startup));
 
+            // Setup MQTT subscriptions
+            
+            
+
             /*services.AddIdentityServer()
                 .AddDeveloperSigningCredential() // TODO: This should check if in production and utilize cert from machine certificate store
                 .AddInMemoryApiResources(IdentityServerConfig.GetApiResources())
