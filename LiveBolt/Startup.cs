@@ -8,6 +8,12 @@ using Microsoft.Extensions.DependencyInjection;
 using LiveBolt.Data;
 using LiveBolt.Models;
 using Microsoft.AspNetCore.HttpOverrides;
+using MQTTnet.Core.ManagedClient;
+using System;
+using MQTTnet.Core.Client;
+using MQTTnet;
+using MQTTnet.Core;
+using System.Text;
 
 namespace LiveBolt
 {
@@ -24,7 +30,7 @@ namespace LiveBolt
         public IHostingEnvironment HostingEnvironment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public async void ConfigureServices(IServiceCollection services)
         {
             if (HostingEnvironment.IsDevelopment())
             {
@@ -49,8 +55,32 @@ namespace LiveBolt
             services.AddAutoMapper(typeof(Startup));
 
             // Setup MQTT subscriptions
-            
-            
+            var mqttOptions = new ManagedMqttClientOptionsBuilder()
+                .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
+                .WithClientOptions(new MqttClientOptionsBuilder()
+                    .WithClientId("LiveboltServer")
+                    .WithTcpServer("localhost", 1883)
+                    .WithCredentials("livebolt", "livebolt")
+                    .Build())
+                .Build();
+
+            var mqttClient = new MqttFactory().CreateManagedMqttClient();
+
+            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("dlm/register").Build());
+            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("dlm/status").Build());
+
+            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("idm/register").Build());
+            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("idm/status").Build());
+
+            mqttClient.ApplicationMessageReceived += (s, e) =>
+            {
+                Console.WriteLine("### Message Received ###");
+                Console.WriteLine($"Topic: {e.ApplicationMessage.Topic}");
+                Console.WriteLine($"Payload: {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
+                Console.WriteLine();
+            };
+
+            await mqttClient.StartAsync(mqttOptions);
 
             /*services.AddIdentityServer()
                 .AddDeveloperSigningCredential() // TODO: This should check if in production and utilize cert from machine certificate store
