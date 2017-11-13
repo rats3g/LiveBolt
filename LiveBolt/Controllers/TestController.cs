@@ -99,8 +99,8 @@ namespace LiveBolt.Controllers
                 Nickname = "Test Home",
                 PasswordHash = passwordHasher.GetBytes(256),
                 Salt = passwordHasher.Salt,
-                Latitude = 40.4378560,
-                Longitude = -79.9625200,
+                Latitude = 40.759211,
+                Longitude = -73.984638,
                 Users = new List<ApplicationUser>
                 {
                     user1,
