@@ -122,7 +122,7 @@ namespace LiveBolt.Services
 
             var message = new MqttApplicationMessageBuilder()
                 .WithTopic($"dlm/lock/{moduleId}")
-                .WithPayload(isLocked.ToString())
+                .WithPayload((isLocked ? 1 : 0).ToString())
                 .WithExactlyOnceQoS()
                 .Build();
 
