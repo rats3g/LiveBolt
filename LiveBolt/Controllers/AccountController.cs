@@ -61,7 +61,7 @@ namespace LiveBolt.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName };
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName, DeviceToken = model.DeviceToken };
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
@@ -107,6 +107,18 @@ namespace LiveBolt.Controllers
             }
 
             return BadRequest(ModelState);
+        }
+
+        [HttpPatch]
+        public async Task<IActionResult> UpdateDeviceToken(UpdateDeviceTokenViewModel model)
+        {
+            var currentUser = await _userManager.GetUserAsync(HttpContext.User);
+
+            currentUser.DeviceToken = model.DeviceToken;
+
+            await _repository.Commit();
+
+            return Ok();
         }
     }
 }

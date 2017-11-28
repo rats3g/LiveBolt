@@ -9,5 +9,6 @@ namespace LiveBolt.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public bool IsHome { get; set; }
+        public string DeviceToken { get; set; }
     }
 }

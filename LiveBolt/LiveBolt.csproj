@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" PrivateAssets="All" />
     <PackageReference Include="MQTTnet.AspNetCore" Version="2.5.1" />
+    <PackageReference Include="PushSharp" Version="4.0.10" />
   </ItemGroup>
 
   <ItemGroup>

@@ -69,6 +69,7 @@ namespace LiveBolt.Controllers
                 var newHome = await _repository.AddHome(home);
 
                 currentUser.HomeId = newHome.Id;
+                currentUser.IsHome = true;
 
                 await _repository.Commit();
 

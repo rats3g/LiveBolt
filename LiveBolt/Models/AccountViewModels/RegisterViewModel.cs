@@ -25,5 +25,8 @@ namespace LiveBolt.Models.AccountViewModels
 
         [Required]
         public string LastName { get; set; }
+
+        [Required]
+        public string DeviceToken { get; set; }
     }
 }

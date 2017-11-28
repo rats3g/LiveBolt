@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -8,8 +9,11 @@ using IdentityServer4.Extensions;
 using LiveBolt.Data;
 using LiveBolt.Models;
 using LiveBolt.Models.HomeViewModels;
+using LiveBolt.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace LiveBolt.Controllers
 {
@@ -18,12 +22,16 @@ namespace LiveBolt.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
+        private readonly IAPNSService _apns;
+        private readonly IRepository _repository;
 
-        public TestController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMapper mapper)
+        public TestController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMapper mapper, IAPNSService apns, IRepository repository)
         {
             _context = context;
             _userManager = userManager;
             _mapper = mapper;
+            _apns = apns;
+            _repository = repository;
         }
 
         [HttpDelete]
@@ -129,6 +137,24 @@ namespace LiveBolt.Controllers
             var mappedHome = _mapper.Map<Home, HomeStatusViewModel>(storedHome);
 
             return Ok(mappedHome);
+        }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> SendPushForHomeAsync()
+        {
+            var currentUser = await _userManager.GetUserAsync(HttpContext.User);
+
+            if (currentUser.HomeId == null)
+            {
+                return BadRequest();
+            }
+
+            var home = await _repository.GetHomeById(currentUser.HomeId);
+
+            _apns.SendPushNotifications(home.Users.Where(user => user.DeviceToken != null).Select(user => user.DeviceToken), JObject.Parse("{'aps':{'alert':'Testing.. (0)','badge':1,'sound':'default'}}"));
+
+            return Ok();
         }
     }
 }
