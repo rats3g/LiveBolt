@@ -168,5 +168,23 @@ namespace LiveBolt.Controllers
 
             return BadRequest(ModelState);
         }
+
+        [HttpPatch]
+        public async Task<IActionResult> EditNickname(EditNicknameViewModel model)
+        {
+            var currentUser = await _userManager.GetUserAsync(HttpContext.User);
+
+            if (currentUser.HomeId == null) {
+                return BadRequest();
+            }
+
+            var home = await _repository.GetHomeById(currentUser.HomeId);
+
+            home.Nickname = model.Nickname;
+
+            await _repository.Commit();
+
+            return Ok();
+        }
     }
 }

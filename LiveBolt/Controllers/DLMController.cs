@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using LiveBolt.Data;
 using LiveBolt.Models;
@@ -71,6 +72,35 @@ namespace LiveBolt.Controllers
             dlm.AssociatedHomeId = home.Id;
 
             home.DLMs.Add(dlm);
+
+            await _repository.Commit();
+
+            return Ok();
+        }
+
+        [HttpPatch]
+        public async Task<IActionResult> EditNickname(EditNicknameViewModel model)
+        {
+            var dlm = await _repository.GetDLMByGuid(model.Guid);
+            if (dlm == null)
+            {
+                return BadRequest();
+            }
+
+            var currentUser = await _userManager.GetUserAsync(HttpContext.User);
+
+            if (currentUser.HomeId == null) {
+                return BadRequest();
+            }
+
+            var home = await _repository.GetHomeById(currentUser.HomeId);
+
+            if (!home.DLMs.Any(x => x.Id == model.Guid))
+            {
+                return BadRequest();
+            }
+
+            dlm.Nickname = model.Nickname;
 
             await _repository.Commit();
 
