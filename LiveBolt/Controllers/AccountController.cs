@@ -109,7 +109,7 @@ namespace LiveBolt.Controllers
             return BadRequest(ModelState);
         }
 
-        [HttpPatch]
+        [HttpPost]
         public async Task<IActionResult> UpdateDeviceToken(UpdateDeviceTokenViewModel model)
         {
             var currentUser = await _userManager.GetUserAsync(HttpContext.User);

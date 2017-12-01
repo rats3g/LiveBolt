@@ -24,14 +24,16 @@ namespace LiveBolt.Controllers
         private readonly IMapper _mapper;
         private readonly IAPNSService _apns;
         private readonly IRepository _repository;
+        private readonly IMLService _mLService;
 
-        public TestController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMapper mapper, IAPNSService apns, IRepository repository)
+        public TestController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMapper mapper, IAPNSService apns, IRepository repository, IMLService mLService)
         {
             _context = context;
             _userManager = userManager;
             _mapper = mapper;
             _apns = apns;
             _repository = repository;
+            _mLService = mLService;
         }
 
         [HttpDelete]
@@ -141,7 +143,7 @@ namespace LiveBolt.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> SendPushForHomeAsync()
+        public async Task<IActionResult> SendPushForHome()
         {
             var currentUser = await _userManager.GetUserAsync(HttpContext.User);
 
@@ -152,7 +154,25 @@ namespace LiveBolt.Controllers
 
             var home = await _repository.GetHomeById(currentUser.HomeId);
 
-            _apns.SendPushNotifications(home.Users.Where(user => user.DeviceToken != null).Select(user => user.DeviceToken), JObject.Parse("{'aps':{'alert':'Testing.. (0)','badge':1,'sound':'default'}}"));
+            _apns.SendPushNotifications(home.Users.Where(user => user.DeviceToken != null).Select(user => user.DeviceToken), JObject.Parse("{'aps':{'alert':{'title': 'Home Alert','body': 'Home is in an unsafe state. Would you like to lock your doors?'},'badge':1,'sound':'default','category': 'ML_CATEGORY'}}"));
+
+            return Ok(home.Users.Select(user => user.DeviceToken));
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> TestMachineLearning()
+        {
+            var currentUser = await _userManager.GetUserAsync(HttpContext.User);
+
+            if (currentUser.HomeId == null)
+            {
+                return BadRequest();
+            }
+
+            var home = await _repository.GetHomeById(currentUser.HomeId);
+
+            _mLService.checkHomeStatus(home);
 
             return Ok();
         }

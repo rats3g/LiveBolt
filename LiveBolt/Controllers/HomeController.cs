@@ -186,5 +186,27 @@ namespace LiveBolt.Controllers
 
             return Ok();
         }
+
+        [HttpPost]
+        public async Task<IActionResult> MLResponse(MLResponseViewModel model)
+        {
+            var currentUser = await _userManager.GetUserAsync(HttpContext.User);
+
+            if (currentUser.HomeId == null) {
+                return BadRequest();
+            }
+
+            if (model.LockDoors)
+            {
+                var home = await _repository.GetHomeById(currentUser.HomeId);
+
+                foreach (var dlm in home.DLMs)
+                {
+                    await _mqtt.PublishLockCommand(dlm.Id, true);
+                }
+            }
+
+            return Ok();
+        }
     }
 }

@@ -52,6 +52,7 @@ namespace LiveBolt
             services.AddScoped<IRepository, Repository>();
             services.AddScoped<IMqttService, MqttService>();
             services.AddScoped<IAPNSService, APNSService>();
+            services.AddScoped<IMLService, MLService>();
 
             services.AddMvc();
 
