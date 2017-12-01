@@ -62,7 +62,7 @@ namespace LiveBolt.Controllers
 
             var dlm1 = new DLM
             {
-                Id = Guid.NewGuid(),
+                Id = new Guid("66155e63-3b3d-41fc-a3ff-34cd7b521a59"),
                 Nickname = "Front Door",
                 IsLocked = true,
                 AssociatedHomeId = 1
@@ -70,7 +70,7 @@ namespace LiveBolt.Controllers
 
             var dlm2 = new DLM
             {
-                Id = Guid.NewGuid(),
+                Id = new Guid("229371a2-0af0-4514-ade7-ad339f94ced4"),
                 Nickname = "Back Door",
                 IsLocked = false,
                 AssociatedHomeId = 1
@@ -81,7 +81,7 @@ namespace LiveBolt.Controllers
 
             var idm1 = new IDM
             {
-                Id = Guid.NewGuid(),
+                Id = new Guid("e9c7aa44-0653-4f5e-b5b7-0aa7c2fdeea6"),
                 Nickname = "Bedroom Window",
                 IsClosed = true,
                 AssociatedHomeId = 1
@@ -89,7 +89,7 @@ namespace LiveBolt.Controllers
 
             var idm2 = new IDM
             {
-                Id = Guid.NewGuid(),
+                Id = new Guid("cc46356a-2ea8-4fd9-b4d2-1305c974c788"),
                 Nickname = "Kitchen Window",
                 IsClosed = false,
                 AssociatedHomeId = 1

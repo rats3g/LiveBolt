@@ -169,7 +169,7 @@ namespace LiveBolt.Controllers
             return BadRequest(ModelState);
         }
 
-        [HttpPatch]
+        [HttpPost]
         public async Task<IActionResult> EditNickname(EditNicknameViewModel model)
         {
             var currentUser = await _userManager.GetUserAsync(HttpContext.User);

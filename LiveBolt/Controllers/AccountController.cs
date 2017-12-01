@@ -120,5 +120,17 @@ namespace LiveBolt.Controllers
 
             return Ok();
         }
+
+        [HttpPost]
+        public async Task<IActionResult> EditName(EditNameViewModel model) {
+            var currentUser = await _userManager.GetUserAsync(HttpContext.User);
+
+            currentUser.FirstName = model.FirstName;
+            currentUser.LastName = model.LastName;
+
+            await _repository.Commit();
+
+            return Ok();
+        }
     }
 }

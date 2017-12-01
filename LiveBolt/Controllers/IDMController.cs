@@ -77,7 +77,7 @@ namespace LiveBolt.Controllers
             return Ok();
         }
 
-        [HttpPatch]
+        [HttpPost]
         public async Task<IActionResult> EditNickname(EditNicknameViewModel model)
         {
             var idm = await _repository.GetIDMByGuid(model.Guid);
