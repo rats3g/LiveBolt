@@ -132,5 +132,51 @@ namespace LiveBolt.Services
 
             return true;
         }
+
+        public async Task PublishRemoveDLMCommand(Guid moduleId)
+        {
+            var mqttOptions = new MqttClientOptionsBuilder()
+                .WithClientId("LiveboltServer")
+                .WithTcpServer("localhost")
+                .WithCredentials("livebolt", "livebolt")
+                .Build();
+
+            var mqttClient = new MqttFactory().CreateMqttClient();
+
+            await mqttClient.ConnectAsync(mqttOptions);
+
+            var message = new MqttApplicationMessageBuilder()
+                .WithTopic($"dlm/remove/{moduleId}")
+                .WithPayload(1.ToString())
+                .WithExactlyOnceQoS()
+                .Build();
+
+            await mqttClient.PublishAsync(message);
+
+            await mqttClient.DisconnectAsync();
+        }
+
+        public async Task PublishRemoveIDMCommand(Guid moduleId)
+        {
+            var mqttOptions = new MqttClientOptionsBuilder()
+                .WithClientId("LiveboltServer")
+                .WithTcpServer("localhost")
+                .WithCredentials("livebolt", "livebolt")
+                .Build();
+
+            var mqttClient = new MqttFactory().CreateMqttClient();
+
+            await mqttClient.ConnectAsync(mqttOptions);
+
+            var message = new MqttApplicationMessageBuilder()
+                .WithTopic($"idm/remove/{moduleId}")
+                .WithPayload(1.ToString())
+                .WithExactlyOnceQoS()
+                .Build();
+
+            await mqttClient.PublishAsync(message);
+
+            await mqttClient.DisconnectAsync();
+        }
     }
 }

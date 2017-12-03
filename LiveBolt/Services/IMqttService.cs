@@ -10,5 +10,7 @@ namespace LiveBolt.Services
         void RegisterIDM(Guid moduleId, string homeId, string homePassword, string nickname);
         void UpdateIDMStatus(Guid moduleId, bool isClosed);
         Task<bool> PublishLockCommand(Guid moduleId, bool isLocked);
+        Task PublishRemoveDLMCommand(Guid moduelId);
+        Task PublishRemoveIDMCommand(Guid moduleId);
     }
 }

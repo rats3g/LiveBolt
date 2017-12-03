@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using LiveBolt.Data;
 using LiveBolt.Models;
 using LiveBolt.Models.IDMViewModels;
+using LiveBolt.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +16,13 @@ namespace LiveBolt.Controllers
     {
         private readonly IRepository _repository;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMqttService _mqttService;
 
-        public IDMController(IRepository repository, UserManager<ApplicationUser> userManager)
+        public IDMController(IRepository repository, UserManager<ApplicationUser> userManager, IMqttService mqttService)
         {
             _repository = repository;
             _userManager = userManager;
+            _mqttService = mqttService;
         }
 
         [AllowAnonymous]
@@ -94,12 +97,46 @@ namespace LiveBolt.Controllers
 
             var home = await _repository.GetHomeById(currentUser.HomeId);
 
-            if (!home.IDMs.Any(x => x.Id == model.Guid))
+            if (home.IDMs.All(x => x.Id != model.Guid))
             {
                 return BadRequest();
             }
 
             idm.Nickname = model.Nickname;
+
+            await _repository.Commit();
+
+            return Ok();
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Remove(RemoveViewModel model)
+        {
+            var idm = await _repository.GetIDMByGuid(model.Guid);
+            if (idm == null)
+            {
+                return BadRequest();
+            }
+
+            var currentUser = await _userManager.GetUserAsync(HttpContext.User);
+
+            if (currentUser.HomeId == null)
+            {
+                return BadRequest();
+            }
+
+            var home = await _repository.GetHomeById(currentUser.HomeId);
+
+            if (home.IDMs.All(x => x.Id != model.Guid))
+            {
+                return BadRequest();
+            }
+
+            await _mqttService.PublishRemoveIDMCommand(idm.Id);
+
+            home.IDMs.Remove(idm);
+
+            _repository.RemoveIdm(idm);
 
             await _repository.Commit();
 

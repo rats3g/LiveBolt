@@ -57,6 +57,16 @@ namespace LiveBolt.Data
             _context.Homes.Remove(home);
         }
 
+        public void RemoveIdm(IDM idm)
+        {
+            _context.IDMs.Remove(idm);
+        }
+
+        public void RemoveDlm(DLM dlm)
+        {
+            _context.DLMs.Remove(dlm);
+        }
+
         public async Task<DLM> GetDLMByGuid(Guid guid)
         {
             return await _context.DLMs.Where(dlm => dlm.Id.Equals(guid)).FirstOrDefaultAsync();

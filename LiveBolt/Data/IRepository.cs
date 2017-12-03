@@ -11,6 +11,8 @@ namespace LiveBolt.Data
         bool ContainsHome(string name);
         Task<Home> AddHome(Home home);
         void RemoveHome(Home home);
+        void RemoveDlm(DLM dlm);
+        void RemoveIdm(IDM idm);
         Task<DLM> GetDLMByGuid(Guid guid);
         Task<IDM> GetIDMByGuid(Guid guid);
         void AddDLM(DLM dlm);

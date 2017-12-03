@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using LiveBolt.Data;
 using LiveBolt.Models;
 using LiveBolt.Models.DLMViewModels;
+using LiveBolt.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +16,13 @@ namespace LiveBolt.Controllers
     {
         private readonly IRepository _repository;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMqttService _mqttService;
 
-        public DLMController(IRepository repository, UserManager<ApplicationUser> userManager)
+        public DLMController(IRepository repository, UserManager<ApplicationUser> userManager, IMqttService mqttService)
         {
             _repository = repository;
             _userManager = userManager;
+            _mqttService = mqttService;
         }
 
         [HttpPost]
@@ -95,12 +98,46 @@ namespace LiveBolt.Controllers
 
             var home = await _repository.GetHomeById(currentUser.HomeId);
 
-            if (!home.DLMs.Any(x => x.Id == model.Guid))
+            if (home.DLMs.All(x => x.Id != model.Guid))
             {
                 return BadRequest();
             }
 
             dlm.Nickname = model.Nickname;
+
+            await _repository.Commit();
+
+            return Ok();
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Remove(RemoveViewModel model)
+        {
+            var dlm = await _repository.GetDLMByGuid(model.Guid);
+            if (dlm == null)
+            {
+                return BadRequest();
+            }
+
+            var currentUser = await _userManager.GetUserAsync(HttpContext.User);
+
+            if (currentUser.HomeId == null)
+            {
+                return BadRequest();
+            }
+
+            var home = await _repository.GetHomeById(currentUser.HomeId);
+
+            if (home.DLMs.All(x => x.Id != model.Guid))
+            {
+                return BadRequest();
+            }
+
+            await _mqttService.PublishRemoveDLMCommand(dlm.Id);
+
+            home.DLMs.Remove(dlm);
+
+            _repository.RemoveDlm(dlm);
 
             await _repository.Commit();
 
