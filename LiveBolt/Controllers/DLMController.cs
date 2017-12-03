@@ -110,7 +110,7 @@ namespace LiveBolt.Controllers
             return Ok();
         }
 
-        [HttpDelete]
+        [HttpPost]
         public async Task<IActionResult> Remove(RemoveViewModel model)
         {
             var dlm = await _repository.GetDLMByGuid(model.Guid);
