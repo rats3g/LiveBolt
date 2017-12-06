@@ -154,9 +154,9 @@ namespace LiveBolt.Controllers
 
             var home = await _repository.GetHomeById(currentUser.HomeId);
 
-            _apns.SendPushNotifications(home.Users.Where(user => user.DeviceToken != null).Select(user => user.DeviceToken), JObject.Parse("{'aps':{'alert':{'title': 'Home Alert','body': 'Home is in an unsafe state. Would you like to lock your doors?'},'badge':1,'sound':'default','category': 'ML_CATEGORY'}}"));
+            _apns.SendPushNotifications(home.Users.Where(user => user.DeviceToken != null && user.DeviceToken.Length == 64).Select(user => user.DeviceToken), JObject.Parse("{'aps':{'alert':{'title': 'Home Alert','body': 'Home is in an unsafe state. Would you like to lock your doors?'},'badge':1,'sound':'default','category': 'ML_CATEGORY'}}"));
 
-            return Ok(home.Users.Select(user => user.DeviceToken));
+            return Ok(home.Users.Where(user => user.DeviceToken != null && user.DeviceToken.Length == 64).Select(user => user.DeviceToken));
         }
 
         [HttpGet]

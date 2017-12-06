@@ -18,7 +18,7 @@ namespace LiveBolt.Services
         {
             var predictedDoorLockPercentage = predictDoorLockPercentage(home);
             if (predictedDoorLockPercentage - (home.DLMs.Count(dlm => dlm.IsLocked) / home.DLMs.Count) > 0.25) {
-                _apns.SendPushNotifications(home.Users.Where(user => user.DeviceToken != null).Select(user => user.DeviceToken), JObject.Parse("{'aps':{'alert':{'title': 'Home Alert','body': 'Home is in an unsafe state. Would you like to lock your doors?'},'badge':1,'sound':'default','category': 'ML_CATEGORY'}}"));
+                _apns.SendPushNotifications(home.Users.Where(user => user.DeviceToken != null && user.DeviceToken.Length == 64).Select(user => user.DeviceToken), JObject.Parse("{'aps':{'alert':{'title': 'Home Alert','body': 'Home is in an unsafe state. Would you like to lock your doors?'},'badge':1,'sound':'default','category': 'ML_CATEGORY'}}"));
             }
         }
 
