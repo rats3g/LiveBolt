@@ -153,6 +153,7 @@ namespace LiveBolt
                 {
                     if (!bool.TryParse(values[1], out var isLocked))
                     {
+                        Console.WriteLine($"Could not parse idm/status boolean: {values[1]}");
                         return;
                     }
 

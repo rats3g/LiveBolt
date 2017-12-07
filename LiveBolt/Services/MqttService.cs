@@ -55,12 +55,14 @@ namespace LiveBolt.Services
             var dlm = await _repository.GetDLMByGuid(moduleId);
             if (dlm == null)
             {
+                Console.WriteLine($"No dlm by guid: {moduleId}");
                 return;
             }
 
             dlm.IsLocked = isLocked;
 
             await _repository.Commit();
+            Console.WriteLine($"Setting dlm ({moduleId} to {isLocked}");
         }
 
         public async void RegisterIDM(Guid moduleId, string homeId, string homePassword, string nickname)
@@ -97,12 +99,14 @@ namespace LiveBolt.Services
             var idm = await _repository.GetIDMByGuid(moduleId);
             if (idm == null)
             {
+                Console.WriteLine($"No idm by guid: {moduleId}");
                 return;
             }
 
             idm.IsClosed = isClosed;
 
             await _repository.Commit();
+            Console.WriteLine($"Setting idm ({moduleId} to {isClosed}");
         }
 
         public async Task<bool> PublishLockCommand(Guid moduleId, bool isLocked)
