@@ -120,6 +120,8 @@ namespace LiveBolt
 
             mqttClient.ApplicationMessageReceived += (s, e) =>
             {
+                Console.WriteLine($"Received MQTT: {e.ApplicationMessage.Topic} - {e.ApplicationMessage.Payload}");
+
                 var mqttService = serviceProvider.GetService<IMqttService>();
 
                 var topic = e.ApplicationMessage.Topic;
