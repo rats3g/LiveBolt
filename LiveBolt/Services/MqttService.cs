@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using LiveBolt.Data;
 using LiveBolt.Models;
+using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Core;
 using MQTTnet.Core.Client;
@@ -12,10 +13,12 @@ namespace LiveBolt.Services
     public class MqttService : IMqttService
     {
         private readonly IRepository _repository;
+        private readonly ILogger _logger;
 
-        public MqttService(IRepository repository)
+        public MqttService(IRepository repository, ILogger logger)
         {
             _repository = repository;
+            _logger = logger;
         }
 
         public async void RegisterDLM(Guid moduleId, string homeId, string homePassword, string nickname)
@@ -177,6 +180,52 @@ namespace LiveBolt.Services
             await mqttClient.PublishAsync(message);
 
             await mqttClient.DisconnectAsync();
+        }
+
+        public async void RemoveDLM(Guid moduleId, string homeId)
+        {
+            var dlm = await _repository.GetDLMByGuid(moduleId);
+            if (dlm == null)
+            {
+                _logger.LogDebug($"No dlm by guid: {moduleId}");
+                return;
+            }
+
+            var home = await _repository.GetHomeByName(homeId);
+            if (home == null)
+            {
+                _logger.LogDebug($"No home by name: {homeId}");
+                return;
+            }
+
+            home.DLMs.Remove(dlm);
+
+            _repository.RemoveDlm(dlm);
+
+            await _repository.Commit();
+        }
+
+        public async void RemoveIDM(Guid moduleId, string homeId)
+        {
+            var idm = await _repository.GetIDMByGuid(moduleId);
+            if (idm == null)
+            {
+                _logger.LogDebug($"No idm by guid: {moduleId}");
+                return;
+            }
+
+            var home = await _repository.GetHomeByName(homeId);
+            if (home == null)
+            {
+                _logger.LogDebug($"No home by name: {homeId}");
+                return;
+            }
+
+            home.IDMs.Remove(idm);
+
+            _repository.RemoveIdm(idm);
+
+            await _repository.Commit();
         }
     }
 }

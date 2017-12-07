@@ -12,5 +12,7 @@ namespace LiveBolt.Services
         Task<bool> PublishLockCommand(Guid moduleId, bool isLocked);
         Task PublishRemoveDLMCommand(Guid moduelId);
         Task PublishRemoveIDMCommand(Guid moduleId);
+        void RemoveDLM(Guid moduleId, string homeId);
+        void RemoveIDM(Guid moduleId, string homeId);
     }
 }

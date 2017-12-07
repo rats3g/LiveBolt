@@ -15,6 +15,7 @@ using MQTTnet;
 using MQTTnet.Core;
 using System.Text;
 using LiveBolt.Services;
+using Microsoft.Extensions.Logging;
 
 namespace LiveBolt
 {
@@ -66,7 +67,7 @@ namespace LiveBolt
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext dbContext, IServiceProvider serviceProvider)
+        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext dbContext, IServiceProvider serviceProvider, ILogger logger)
         {
             if (env.IsDevelopment())
             {
@@ -111,9 +112,11 @@ namespace LiveBolt
 
             await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("dlm/register").Build());
             await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("dlm/status").Build());
+            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("dlm/removeConfirm").Build());
 
             await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("idm/register").Build());
             await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("idm/status").Build());
+            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("idm/removeConfirm").Build());
 
             mqttClient.ApplicationMessageReceived += (s, e) =>
             {
@@ -124,6 +127,7 @@ namespace LiveBolt
 
                 if (!Guid.TryParse(values[0], out var guid))
                 {
+                    logger.LogDebug($"Could not parse GUID: {values[0]}");
                     return;
                 }
 
@@ -135,7 +139,8 @@ namespace LiveBolt
                 {
                     if (!bool.TryParse(values[1], out var isLocked))
                     {
-                        return;
+                        logger.LogDebug($"Could not parse dlm/status boolean: {values[1]}");
+                        return;                       
                     }
 
                     mqttService.UpdateDLMStatus(guid, isLocked);
@@ -152,6 +157,16 @@ namespace LiveBolt
                     }
 
                     mqttService.UpdateIDMStatus(guid, isLocked);
+                }
+                else if (topic == "idm/removeConfirm")
+                {
+                    logger.LogDebug($"Received idm/removeConfirm - {e.ApplicationMessage.Payload}");
+                    mqttService.RemoveIDM(guid, values[1]);
+                }
+                else if (topic == "dlm/removeConfirm")
+                {
+                    logger.LogDebug($"Received dlm/removeConfirm - {e.ApplicationMessage.Payload}");
+                    mqttService.RemoveDLM(guid, values[1]);
                 }
             };
 

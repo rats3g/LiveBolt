@@ -38,6 +38,11 @@ namespace LiveBolt.Data
             return null;
         }
 
+        public async Task<Home> GetHomeByName(string name)
+        {
+            return await _context.Homes.Where(home => home.Name == name).Include(home => home.Users).Include(home => home.DLMs).Include(home => home.IDMs).FirstOrDefaultAsync();
+        }
+
         public bool ContainsHome(string name)
         {
             return _context.Homes.Any(home => home.Name == name);

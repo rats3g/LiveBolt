@@ -8,6 +8,7 @@ namespace LiveBolt.Data
     {
         Task<Home> GetHomeById(int? id);
         Home GetHomeByNameAndPassword(string name, string password);
+        Task<Home> GetHomeByName(string name);
         bool ContainsHome(string name);
         Task<Home> AddHome(Home home);
         void RemoveHome(Home home);
