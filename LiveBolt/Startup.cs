@@ -143,6 +143,7 @@ namespace LiveBolt
                         return;
                     }
 
+                    Console.WriteLine("Calling UpdateDLMStatus");
                     mqttService.UpdateDLMStatus(guid, isLocked);
                 }
                 else if (topic == "idm/register" && values.Length == 4)
@@ -169,6 +170,12 @@ namespace LiveBolt
                     Console.WriteLine($"Received dlm/removeConfirm - {e.ApplicationMessage.Payload}");
                     mqttService.RemoveDLM(guid, values[1]);
                 }
+                else
+                {
+                    Console.WriteLine($"Received unknown topic ({topic})");
+                }
+
+
             };
 
             await mqttClient.StartAsync(mqttOptions);

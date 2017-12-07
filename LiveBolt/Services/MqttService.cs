@@ -62,7 +62,7 @@ namespace LiveBolt.Services
             dlm.IsLocked = isLocked;
 
             await _repository.Commit();
-            Console.WriteLine($"Setting dlm ({moduleId} to {isLocked}");
+            Console.WriteLine($"Setting dlm ({moduleId}) to {isLocked}");
         }
 
         public async void RegisterIDM(Guid moduleId, string homeId, string homePassword, string nickname)
@@ -106,7 +106,7 @@ namespace LiveBolt.Services
             idm.IsClosed = isClosed;
 
             await _repository.Commit();
-            Console.WriteLine($"Setting idm ({moduleId} to {isClosed}");
+            Console.WriteLine($"Setting idm ({moduleId}) to {isClosed}");
         }
 
         public async Task<bool> PublishLockCommand(Guid moduleId, bool isLocked)
