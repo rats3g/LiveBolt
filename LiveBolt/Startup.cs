@@ -67,7 +67,7 @@ namespace LiveBolt
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext dbContext, IServiceProvider serviceProvider, ILogger logger)
+        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationDbContext dbContext, IServiceProvider serviceProvider, ILogger<Startup> logger)
         {
             if (env.IsDevelopment())
             {
@@ -127,7 +127,7 @@ namespace LiveBolt
 
                 if (!Guid.TryParse(values[0], out var guid))
                 {
-                    logger.LogDebug($"Could not parse GUID: {values[0]}");
+                    Console.WriteLine($"Could not parse GUID: {values[0]}");
                     return;
                 }
 
@@ -139,8 +139,8 @@ namespace LiveBolt
                 {
                     if (!bool.TryParse(values[1], out var isLocked))
                     {
-                        logger.LogDebug($"Could not parse dlm/status boolean: {values[1]}");
-                        return;                       
+                        Console.WriteLine($"Could not parse dlm/status boolean: {values[1]}");
+                        return;
                     }
 
                     mqttService.UpdateDLMStatus(guid, isLocked);
@@ -160,12 +160,12 @@ namespace LiveBolt
                 }
                 else if (topic == "idm/removeConfirm")
                 {
-                    logger.LogDebug($"Received idm/removeConfirm - {e.ApplicationMessage.Payload}");
+                    Console.WriteLine($"Received idm/removeConfirm - {e.ApplicationMessage.Payload}");
                     mqttService.RemoveIDM(guid, values[1]);
                 }
                 else if (topic == "dlm/removeConfirm")
                 {
-                    logger.LogDebug($"Received dlm/removeConfirm - {e.ApplicationMessage.Payload}");
+                    Console.WriteLine($"Received dlm/removeConfirm - {e.ApplicationMessage.Payload}");
                     mqttService.RemoveDLM(guid, values[1]);
                 }
             };

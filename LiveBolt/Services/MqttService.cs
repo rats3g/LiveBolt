@@ -15,7 +15,7 @@ namespace LiveBolt.Services
         private readonly IRepository _repository;
         private readonly ILogger _logger;
 
-        public MqttService(IRepository repository, ILogger logger)
+        public MqttService(IRepository repository, ILogger<MqttService> logger)
         {
             _repository = repository;
             _logger = logger;
@@ -187,14 +187,14 @@ namespace LiveBolt.Services
             var dlm = await _repository.GetDLMByGuid(moduleId);
             if (dlm == null)
             {
-                _logger.LogDebug($"No dlm by guid: {moduleId}");
+                Console.WriteLine($"No dlm by guid: {moduleId}");
                 return;
             }
 
             var home = await _repository.GetHomeByName(homeId);
             if (home == null)
             {
-                _logger.LogDebug($"No home by name: {homeId}");
+                Console.WriteLine($"No home by name: {homeId}");
                 return;
             }
 
@@ -210,14 +210,14 @@ namespace LiveBolt.Services
             var idm = await _repository.GetIDMByGuid(moduleId);
             if (idm == null)
             {
-                _logger.LogDebug($"No idm by guid: {moduleId}");
+                Console.WriteLine($"No idm by guid: {moduleId}");
                 return;
             }
 
             var home = await _repository.GetHomeByName(homeId);
             if (home == null)
             {
-                _logger.LogDebug($"No home by name: {homeId}");
+                Console.WriteLine($"No home by name: {homeId}");
                 return;
             }
 
