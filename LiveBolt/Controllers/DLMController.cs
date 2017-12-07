@@ -135,6 +135,12 @@ namespace LiveBolt.Controllers
 
             await _mqttService.PublishRemoveDLMCommand(dlm.Id);
 
+            home.DLMs.Remove(dlm);
+
+            _repository.RemoveDlm(dlm);
+
+            await _repository.Commit();
+
             return Ok();
         }
     }

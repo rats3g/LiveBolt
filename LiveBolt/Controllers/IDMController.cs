@@ -134,6 +134,12 @@ namespace LiveBolt.Controllers
 
             await _mqttService.PublishRemoveIDMCommand(idm.Id);
 
+            home.IDMs.Remove(idm);
+
+            _repository.RemoveIdm(idm);
+
+            await _repository.Commit();
+
             return Ok();
         }
     }

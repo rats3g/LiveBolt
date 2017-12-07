@@ -100,7 +100,7 @@ namespace LiveBolt
 
             // Setup MQTT subscriptions
             var mqttOptions = new ManagedMqttClientOptionsBuilder()
-                .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
+                .WithAutoReconnectDelay(TimeSpan.FromSeconds(1))
                 .WithClientOptions(new MqttClientOptionsBuilder()
                     .WithClientId("LiveboltServer")
                     .WithTcpServer("localhost")
@@ -110,13 +110,23 @@ namespace LiveBolt
 
             var mqttClient = new MqttFactory().CreateManagedMqttClient();
 
-            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("dlm/register").Build());
-            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("dlm/status").Build());
-            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("dlm/removeConfirm").Build());
+            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithAtLeastOnceQoS().WithTopic("dlm/register").Build());
+            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithAtLeastOnceQoS().WithTopic("dlm/status").Build());
+            //await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithAtLeastOnceQoS().WithTopic("dlm/removeConfirm").Build());
 
-            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("idm/register").Build());
-            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("idm/status").Build());
-            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("idm/removeConfirm").Build());
+            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithAtLeastOnceQoS().WithTopic("idm/register").Build());
+            await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithAtLeastOnceQoS().WithTopic("idm/status").Build());
+            //await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithAtLeastOnceQoS().WithTopic("idm/removeConfirm").Build());
+
+            mqttClient.Connected += (s, e) =>
+            {
+                Console.WriteLine("Connected to MQTT");
+            };
+
+            mqttClient.Disconnected += (s, e) =>
+            {
+                Console.WriteLine("Disconnected from MQTT");
+            };
 
             mqttClient.ApplicationMessageReceived += (s, e) =>
             {
@@ -162,16 +172,16 @@ namespace LiveBolt
 
                     mqttService.UpdateIDMStatus(guid, isLocked);
                 }
-                else if (topic == "idm/removeConfirm")
-                {
-                    Console.WriteLine($"Received idm/removeConfirm - {e.ApplicationMessage.Payload}");
-                    mqttService.RemoveIDM(guid, values[1]);
-                }
-                else if (topic == "dlm/removeConfirm")
-                {
-                    Console.WriteLine($"Received dlm/removeConfirm - {e.ApplicationMessage.Payload}");
-                    mqttService.RemoveDLM(guid, values[1]);
-                }
+                // else if (topic == "idm/removeConfirm")
+                // {
+                //     Console.WriteLine($"Received idm/removeConfirm - {e.ApplicationMessage.Payload}");
+                //     mqttService.RemoveIDM(guid, values[1]);
+                // }
+                // else if (topic == "dlm/removeConfirm")
+                // {
+                //     Console.WriteLine($"Received dlm/removeConfirm - {e.ApplicationMessage.Payload}");
+                //     mqttService.RemoveDLM(guid, values[1]);
+                // }
                 else
                 {
                     Console.WriteLine($"Received unknown topic ({topic})");

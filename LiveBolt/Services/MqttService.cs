@@ -117,6 +117,10 @@ namespace LiveBolt.Services
                 return false;
             }
 
+            dlm.IsLocked = isLocked;
+
+            await _repository.Commit();
+
             var mqttOptions = new MqttClientOptionsBuilder()
                 .WithClientId("LiveboltServer")
                 .WithTcpServer("localhost")
